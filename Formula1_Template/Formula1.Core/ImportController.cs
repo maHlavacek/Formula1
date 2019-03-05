@@ -70,10 +70,13 @@ namespace Formula1.Core
             return Races.Single(race => race.Number == raceNumber);
         }
 
-        public static string GetDriver(XElement xElement)
+        public static Driver GetDriver(XElement xElement)
         {
-            int raceNumber = (int)xElement.Parent?.Parent?.Attribute("round");
-            return Races.Single(race => race.Number == raceNumber);
+            Driver driver = new Driver();
+            driver.FirstName = xElement.Element("Driver")?.Element("GivenName").Value;
+            driver.LastName = xElement.Element("Driver")?.Element("FamilyName").Value;
+            driver.Nationality = xElement.Element("Driver")?.Element("Nationality").Value;
+            return driver;
         }
     }
 }
