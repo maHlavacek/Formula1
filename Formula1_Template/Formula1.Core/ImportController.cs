@@ -13,6 +13,8 @@ namespace Formula1.Core
     /// </summary>
     public static class ImportController
     {
+        public static List<Race> Races { get; set; }
+        public static List<Result> Results { get; set; }
         /// <summary>
         /// Daten der Rennen werden per Linq2XML aus der
         /// XML-Datei ausgelesen und in die Races-Collection gespeichert.
@@ -21,9 +23,9 @@ namespace Formula1.Core
         /// </summary>
         public static IEnumerable<Race> LoadRacesFromRacesXml()
         {
-            List<Race>Races = new List<Race>();
-            string path = MyFile.GetFullNameInApplicationTree("Races.xml");
-            var xElement = XDocument.Load(path).Root;
+            Races = new List<Race>();
+            string racesPath = MyFile.GetFullNameInApplicationTree("Races.xml");
+            var xElement = XDocument.Load(racesPath).Root;
             if(xElement != null)
             {
                 Races = (from race in xElement.Elements("Race")
@@ -44,9 +46,34 @@ namespace Formula1.Core
         /// </summary>
         public static IEnumerable<Result> LoadResultsFromXmlIntoCollections()
         {
-            throw new NotImplementedException();
+            Results = new List<Result>();
+            string resultPath = MyFile.GetFullNameInApplicationTree("Results.xml");
+            var xElement = XDocument.Load(resultPath).Root;
+            if(xElement != null)
+            {
+                Results = xElement.Elements("Race")?.Elements("ResultList")?.Elements("Result")
+                    .Select(result => new Result
+                    {
+                        Race = GetRace(result),
+                        Driver = GetDriver(result),
+                        Team = GetTeam(result),
+                        Position = (int)Attribute("position"),
+                        Points = (int)Attribute("point")
+                    }).ToList();
+            }
+
         }
 
+        public static Race GetRace(XElement xElement)
+        {
+            int raceNumber = (int)xElement.Parent?.Parent?.Attribute("round");
+            return Races.Single(race => race.Number == raceNumber);
+        }
 
+        public static string GetDriver(XElement xElement)
+        {
+            int raceNumber = (int)xElement.Parent?.Parent?.Attribute("round");
+            return Races.Single(race => race.Number == raceNumber);
+        }
     }
 }
