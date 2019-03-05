@@ -13,6 +13,7 @@ namespace Formula1.Core
     /// </summary>
     public static class ImportController
     {
+        public static List<Race> Races { get;private set; }
         /// <summary>
         /// Daten der Rennen werden per Linq2XML aus der
         /// XML-Datei ausgelesen und in die Races-Collection gespeichert.
@@ -21,7 +22,20 @@ namespace Formula1.Core
         /// </summary>
         public static IEnumerable<Race> LoadRacesFromRacesXml()
         {
-            throw new NotImplementedException();
+            Races = new List<Race>();
+            string path = MyFile.GetFullNameInApplicationTree("Races.xml");
+            var xElement = XDocument.Load(path).Root;
+            if(xElement != null)
+            {
+                Races = (from race in xElement.Elements("Race")
+                        select new Race
+                        {
+                            Number = (int)race.Attribute("Round"),
+                            Date = (DateTime)race.Element("Date"),
+                            Country = race.Element("Circuit")?.Element("Location")?.Element("Country")?.Value,
+                            City = race.Element("Circuit")?.Element("Location")?.Element("Locality")?.Value
+                        }).ToList();
+            }
         }
 
         /// <summary>
