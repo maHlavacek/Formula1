@@ -33,18 +33,24 @@ namespace Formula1.CoreTest
             Assert.AreEqual(300, results.Count);
         }
 
-		//[TestMethod]
-  //      public void T03_LoadVettelsResults()
-  //      {
-  //          // Lade Vettels Platzierungen in ein anonymes Objekt { City, Position}
-  //          // Sortiert nach der Rennnummer
-  //          Assert.Fail("Not implemented!");
-
-  //          Assert.AreEqual(1, results[0].Position);
-  //          Assert.AreEqual(4, results[7].Position);
-  //          Assert.AreEqual(18, results[13].Position);
-
-  //      }
+        [TestMethod]
+        public void T03_LoadVettelsResults()
+        {
+            // Lade Vettels Platzierungen in ein anonymes Objekt { City, Position}
+            // Sortiert nach der Rennnummer
+            // Assert.Fail("Not implemented!");
+            var resultsList = ImportController.LoadResultsFromXmlIntoCollections().ToList();
+            var results = resultsList.OrderBy(o => o.Race.Number)
+                .Where(w => w.Driver.Name == "Vettel Sebastian")
+                .Select(sV => new
+                {
+                    City = sV.Race.City,
+                    Position = sV.Position,
+                }).ToList();
+            Assert.AreEqual(1, results[0].Position);
+            Assert.AreEqual(4, results[7].Position);
+            Assert.AreEqual(18, results[13].Position);
+        }
 
     }
 

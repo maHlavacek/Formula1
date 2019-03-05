@@ -1,6 +1,7 @@
 ﻿using Formula1.Core.Entities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 using Utils;
@@ -52,14 +53,14 @@ namespace Formula1.Core
             var xElement = XDocument.Load(resultPath).Root;
             if (xElement != null)
             {
-                Results = xElement.Elements("Race")?.Elements("ResultList")?.Elements("Result")
+                Results = xElement.Elements("Race")?.Elements("ResultsList")?.Elements("Result")
                     .Select(result => new Result
                     {
                         Race = GetRace(result),
                         Driver = GetDriver(result),
                         Team = GetTeam(result),
                         Position = (int)result.Attribute("position"),
-                        Points = (int)result.Attribute("point")
+                        Points = (int)result.Attribute("points")
                     }).ToList();
             }
             return Results;
@@ -85,13 +86,13 @@ namespace Formula1.Core
 
         public static Team GetTeam(XElement xElement)
         {
-            var result = xElement.Elements("Constructor")?.Elements("Name")
+            var result = xElement.Elements("Constructor")
                 .Select(team => new Team
                 {
-                    Nationality = team.Element("Nationality").Value,
+                    Nationality = (string)team.Element("Nationality"),
+                    Name = (string)team.Element("Name")
                 });
             return result.Single();
- 
         }
     }
 }
