@@ -26,16 +26,16 @@ namespace Formula1.Core
             Races = new List<Race>();
             string racesPath = MyFile.GetFullNameInApplicationTree("Races.xml");
             var xElement = XDocument.Load(racesPath).Root;
-            if(xElement != null)
+            if (xElement != null)
             {
                 Races = (from race in xElement.Elements("Race")
-                        select new Race
-                        {
-                            Number = (int)race.Attribute("round"),
-                            Date = (DateTime)race.Element("Date"),
-                            Country = race.Element("Circuit")?.Element("Location")?.Element("Country")?.Value,
-                            City = race.Element("Circuit")?.Element("Location")?.Element("Locality")?.Value
-                        }).ToList();
+                         select new Race
+                         {
+                             Number = (int)race.Attribute("round"),
+                             Date = (DateTime)race.Element("Date"),
+                             Country = race.Element("Circuit")?.Element("Location")?.Element("Country")?.Value,
+                             City = race.Element("Circuit")?.Element("Location")?.Element("Locality")?.Value
+                         }).ToList();
             }
             return Races;
         }
@@ -46,10 +46,11 @@ namespace Formula1.Core
         /// </summary>
         public static IEnumerable<Result> LoadResultsFromXmlIntoCollections()
         {
+            LoadRacesFromRacesXml();
             Results = new List<Result>();
             string resultPath = MyFile.GetFullNameInApplicationTree("Results.xml");
             var xElement = XDocument.Load(resultPath).Root;
-            if(xElement != null)
+            if (xElement != null)
             {
                 Results = xElement.Elements("Race")?.Elements("ResultList")?.Elements("Result")
                     .Select(result => new Result
@@ -57,11 +58,11 @@ namespace Formula1.Core
                         Race = GetRace(result),
                         Driver = GetDriver(result),
                         Team = GetTeam(result),
-                        Position = (int)Attribute("position"),
-                        Points = (int)Attribute("point")
+                        Position = (int)result.Attribute("position"),
+                        Points = (int)result.Attribute("point")
                     }).ToList();
             }
-
+            return Results;
         }
 
         public static Race GetRace(XElement xElement)
@@ -72,11 +73,25 @@ namespace Formula1.Core
 
         public static Driver GetDriver(XElement xElement)
         {
-            Driver driver = new Driver();
-            driver.FirstName = xElement.Element("Driver")?.Element("GivenName").Value;
-            driver.LastName = xElement.Element("Driver")?.Element("FamilyName").Value;
-            driver.Nationality = xElement.Element("Driver")?.Element("Nationality").Value;
-            return driver;
+            var result = xElement.Elements("Driver")
+                .Select(driver => new Driver
+                {
+                    FirstName = driver.Element("GivenName").Value,
+                    LastName = driver.Element("FamilyName").Value,
+                    Nationality = driver.Element("Nationality").Value
+                });
+            return result.Single();
+        }
+
+        public static Team GetTeam(XElement xElement)
+        {
+            var result = xElement.Elements("Constructor")?.Elements("Name")
+                .Select(team => new Team
+                {
+                    Nationality = team.Element("Nationality").Value,
+                });
+            return result.Single();
+ 
         }
     }
 }
